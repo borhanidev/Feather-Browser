@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Bookmarks</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .bookmarks-container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .bookmark-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .bookmark-item:hover {
+            background: var(--hover-bg);
+        }
+
+        .bookmark-title {
+            flex: 1;
+            margin-right: 16px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .bookmark-url {
+            color: #5f6368;
+            font-size: 12px;
+            margin-right: 16px;
+        }
+
+        .bookmark-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .bookmark-actions button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bookmark-actions button:hover {
+            background: var(--hover-bg);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="bookmarks-container">
+        <h2>Bookmarks</h2>
+        <div id="bookmarks-list"></div>
+    </div>
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        function deleteBookmark(url) {
+            ipcRenderer.send('delete-bookmark', url);
+        }
+
+        function openBookmark(event, url) {
+            event.preventDefault();
+            ipcRenderer.send('load-url', url);
+        }
+
+        // Request bookmarks from main process
+        ipcRenderer.send('get-bookmarks');
+
+        // Handle bookmarks list
+        ipcRenderer.on('bookmarks-list', (event, bookmarks) => {
+            const bookmarksList = document.getElementById('bookmarks-list');
+            if (bookmarks.length === 0) {
+                bookmarksList.innerHTML = `
+                    <div class="empty-state">
+                        <span class="material-icons" style="font-size: 48px; color: #5f6368;">bookmark_border</span>
+                        <p>No bookmarks yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            bookmarksList.innerHTML = bookmarks.map(bookmark => `
+                <div class="bookmark-item">
+                    <a href="${bookmark.url}" class="bookmark-title" onclick="openBookmark(event, '${bookmark.url}')">${bookmark.title}</a>
+                    <span class="bookmark-url">${bookmark.url}</span>
+                    <div class="bookmark-actions">
+                        <button onclick="deleteBookmark('${bookmark.url}')" title="Delete bookmark">
+                            <span class="material-icons">delete</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        });
+
+        // Delete bookmark
+        function deleteBookmark(url) {
+            ipcRenderer.send('delete-bookmark', url);
+        }
+
+        // Handle bookmark deletion
+        ipcRenderer.on('bookmark-deleted', () => {
+            ipcRenderer.send('get-bookmarks');
+        });
+
+        // Handle bookmark clicks
+        document.addEventListener('click', (e) => {
+            if (e.target.tagName === 'A') {
+                e.preventDefault();
+                ipcRenderer.send('load-url', e.target.href);
+            }
+        });
+    </script>
+</body>
+</html>

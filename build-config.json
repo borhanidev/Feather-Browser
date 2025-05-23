@@ -1,0 +1,15 @@
+{
+    "appId": "com.example.modernbrowser",
+    "productName": "Modern Browser",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    }
+  }
+  

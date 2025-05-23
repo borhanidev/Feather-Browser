@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#22d3ee"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(0,0,0,0.2)"/>
+    </filter>
+  </defs>
+
+  <!-- Outer circle with gradient -->
+  <circle cx="64" cy="64" r="56" fill="url(#mainGradient)" filter="url(#shadow)"/>
+
+  <!-- Inner browser symbol -->
+  <g transform="translate(32 32)">
+    <rect width="64" height="64" fill="#fff" rx="8"/>
+    <path fill="#3b82f6" d="M16 16h32v8H16z"/>
+    <circle cx="56" cy="20" r="4" fill="#94a3b8"/>
+    <path fill="#cffafe" d="M16 32h40v24H16z"/>
+    <path fill="#6366f1" d="M40 44l-8 12 8-3 8 3-8-12z"/>
+  </g>
+
+  <!-- Outer border -->
+  <path fill="none" stroke="#fff" stroke-width="2" 
+        d="M64 8l48 83H16L64 8z" opacity="0.8"/>
+</svg>

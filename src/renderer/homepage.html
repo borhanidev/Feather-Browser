@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>New Tab</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: var(--fallback-bg-color, #1a1a1a);
+      background-image: var(--background-image);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      body { display: flex; justify-content: center; align-items: center; flex-direction: column; }
+    }
+
+    .loading-screen {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.3s ease;
+    }
+
+    .spinner {
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top: 3px solid rgba(255, 255, 255, 0.9);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    .homepage-container {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .homepage-container.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .search-container {
+      width: 100%;
+      max-width: 584px;
+      margin: 0 auto; /* Center horizontally */
+      position: relative;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 100px;
+      padding: 12px 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .search-container:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .search-box {
+      width: 100%;
+      font-size: 18px;
+      padding: 8px 12px;
+      color: rgba(255, 255, 255, 0.95);
+      background: transparent;
+      border: none;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+    }
+
+    .search-box::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .search-icon {
+      font-size: 24px;
+      color: rgba(255, 255, 255, 0.8);
+      transition: all 0.3s ease;
+    }
+
+    .search-button {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      padding: 10px;
+      border-radius: 50%;
+      transition: all 0.3s ease;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-button:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.1);
+    }
+
+    .stats-container {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 16px 24px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      margin: 25px 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.4s ease;
+      max-width: 85%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .stats-container:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .stat-box {
+      padding: 0 30px;
+      position: relative;
+      text-align: center;
+      color: white;
+    }
+
+    .stat-box:not(:last-child):after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 45px;
+      width: 1px;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.7));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transition: all 0.3s ease;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      opacity: 0.85;
+      letter-spacing: 0.6px;
+      transition: all 0.3s ease;
+    }
+
+    .quick-links {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 16px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.4s ease;
+      max-width: 85%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .quick-links:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .quick-link {
+      padding: 15px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      color: white;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .quick-link:hover {
+      transform: translateY(-5px);
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .quick-link-icon {
+      font-size: 28px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff, rgba(255, 255, 255, 0.7));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transition: all 0.4s ease;
+    }
+
+    .customize-button {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 10px 16px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      margin: 0 auto;
+    }
+
+    .customize-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .customize-menu {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      padding: 16px;
+      margin: 16px auto;
+      max-width: 85%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .customize-section {
+      margin-bottom: 16px;
+    }
+
+    .customize-section h3 {
+      color: white;
+      font-size: 14px;
+      margin-bottom: 8px;
+      opacity: 0.9;
+    }
+
+    .customize-section select,
+    .customize-section button {
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .customize-section select:hover,
+    .customize-section button:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .customize-section select:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+    }
+
+    @keyframes spin {
+      0% { 
+        transform: rotate(0deg) scale(1);
+        border-top-color: rgba(255, 255, 255, 0.9);
+        border-right-color: rgba(255, 255, 255, 0.3);
+      }
+      50% {
+        transform: rotate(180deg) scale(1.1);
+        border-top-color: rgba(100, 200, 255, 0.9);
+      }
+      100% { 
+        transform: rotate(360deg) scale(1);
+        border-top-color: rgba(255, 255, 255, 0.9);
+      }
+    }
+
+    .loading-screen {
+      animation: loadingFade 0.5s ease-out forwards;
+      animation-delay: 0.5s;
+    }
+
+    @keyframes loadingFade {
+      from { opacity: 1; }
+      to { opacity: 0; visibility: hidden; }
+    }
+
+    .homepage-container {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: containerEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes containerEntrance {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .search-container {
+      animation: searchFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes searchFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .search-box:focus {
+      animation: inputFocus 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes inputFocus {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+
+    .search-box:focus {
+      background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0.05) 0%, 
+        rgba(255, 255, 255, 0.1) 50%, 
+        rgba(255, 255, 255, 0.05) 100%
+      );
+      background-size: 200% 100%;
+    }
+
+    .stat-box {
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .stat-box:hover {
+      transform: translateY(-5px) scale(1.05);
+    }
+
+    .stat-box:hover .stat-value {
+      transform: scale(1.1);
+      background: linear-gradient(135deg, #fff, #80d0ff);
+      -webkit-background-clip: text;
+    }
+
+    .stat-value {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-block;
+    }
+
+    .quick-link {
+      perspective: 1000px;
+      transform-style: preserve-3d;
+      transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .quick-link:hover {
+      transform: rotateX(10deg) rotateY(-5deg) translateZ(10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .quick-link-icon {
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .quick-link:hover .quick-link-icon {
+      transform: rotate(15deg) scale(1.2);
+    }
+
+    .customize-button {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .customize-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+      );
+      transition: 0.5s;
+    }
+
+    .customize-button:hover::before {
+      left: 100%;
+    }
+
+    /* Staggered animations for quick links */
+    .quick-link {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: linkEntrance 0.6s ease-out forwards;
+    }
+
+    @keyframes linkEntrance {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Add animation delays for each quick link */
+    .quick-link:nth-child(1) { animation-delay: 0.2s; }
+    .quick-link:nth-child(2) { animation-delay: 0.3s; }
+    .quick-link:nth-child(3) { animation-delay: 0.4s; }
+    .quick-link:nth-child(4) { animation-delay: 0.5s; }
+    .quick-link:nth-child(5) { animation-delay: 0.6s; }
+    .quick-link:nth-child(6) { animation-delay: 0.7s; }
+  </style>
+</head>
+<body>
+  <div id="loading-screen" class="loading-screen">
+    <div class="spinner"></div>
+  </div>
+  <script>
+  document.getElementById('loading-screen').addEventListener('animationend', () => { document.querySelector('.homepage-container').style.display = 'block'; });
+  </script>
+  <body onload="setRandomWallpaper()">
+  <div class="homepage-container" style="display: none;">
+    <div class="search-container">
+      <span class="material-icons search-icon">search</span>
+      <input type="text" class="search-box" id="search-input" placeholder="Search the web">
+      <button class="search-button" id="search-button">
+        <span class="material-icons">arrow_forward</span>
+      </button>
+    </div>
+
+    <div class="stats-container">
+      <div class="stat-box">
+        <div class="stat-value" id="trackers-blocked">12</div>
+        <div class="stat-label">Trackers & ads blocked</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="bandwidth-saved">24 MB</div>
+        <div class="stat-label">Bandwidth saved</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="time-saved">5 min</div>
+        <div class="stat-label">Time saved</div>
+      </div>
+    </div>
+
+    <div class="quick-links" id="quick-links"></div>
+
+    <div class="customize-menu" id="customize-menu" style="display: none;">
+      <div class="customize-section">
+        <h3>Theme</h3>
+        <select id="theme-select">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+          <option value="system">System</option>
+        </select>
+      </div>
+      <div class="customize-section">
+        <h3>Search Engine</h3>
+        <select id="search-engine-select">
+          <option value="google">Google</option>
+          <option value="bing">Bing</option>
+          <option value="duckduckgo">DuckDuckGo</option>
+        </select>
+      </div>
+      <div class="customize-section">
+        <h3>Background</h3>
+        <button id="change-wallpaper">Change Wallpaper</button>
+        <button id="reset-wallpaper">Reset to Default</button>
+      </div>
+    </div>
+    <button class="customize-button" id="customize-button">
+      <span class="material-icons">settings</span>
+      <span>Customize</span>
+    </button>
+
+    <input type="file" id="wallpaper-input" accept="image/*" style="display: none;">
+  </div>
+
+  <script>
+async function setRandomWallpaper() {
+  const API_KEY = 'OSYdBlYQNJVbSLazD4sDkqIDTggXBYW2kItw9E89WCG2r1r3ZBCrWeEq';
+  const endpoint = `https://api.pexels.com/v1/search?query=wallpaper&per_page=1&page=${Math.floor(Math.random() * 100)}`;
+  const loadingScreen = document.getElementById('loading-screen');
+
+  try {
+    // Show loading screen with initial state
+    loadingScreen.style.animation = 'none';
+    loadingScreen.style.opacity = '1';
+    loadingScreen.style.display = 'flex';
+
+    const response = await fetch(endpoint, { headers: { Authorization: API_KEY } });
+    const data = await response.json();
+    
+    if (data.photos?.length > 0) {
+      const img = new Image();
+      img.src = data.photos[0].src.original;
+      
+      // Create promise for image loading
+      const imgLoadPromise = new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+
+      // Set timeout as fallback
+      const timeoutPromise = new Promise(resolve => 
+        setTimeout(resolve, 5000)
+      );
+
+      await Promise.race([imgLoadPromise, timeoutPromise]);
+      
+      document.body.style.backgroundImage = `url(${img.src})`;
+    }
+
+  } catch (error) {
+    console.error('Error loading wallpaper:', error);
+  } finally {
+    // Always fade out loading screen
+    loadingScreen.style.animation = 'loadingFade 0.5s ease-out forwards';
+    loadingScreen.addEventListener('animationend', () => {
+      document.querySelector('.homepage-container').style.display = 'block';
+    }, { once: true });
+  }
+}
+
+// Remove the duplicate body onload attribute in the HTML
+    document.getElementById('search-button').addEventListener('click', () => {
+      const query = document.getElementById('search-input').value.trim();
+      if (!query) return;
+      
+      // Use the selected search engine
+      const searchUrl = `${window.searchEngine}${encodeURIComponent(query)}`;
+      
+      if (window.openInNewTab) {
+        window.openInNewTab(searchUrl);
+      } else {
+        window.location.href = searchUrl;
+      }
+    });
+
+    document.getElementById('search-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        document.getElementById('search-button').click();
+      }
+    });
+
+    const quickLinks = [
+      { icon: 'home', label: 'Home', url: 'https://www.google.com' },
+      { icon: 'email', label: 'Mail', url: 'https://mail.google.com' },
+      { icon: 'event', label: 'Calendar', url: 'https://calendar.google.com' },
+      { icon: 'play_circle_filled', label: 'YouTube', url: 'https://youtube.com' },
+    ];
+
+    const container = document.getElementById('quick-links');
+    quickLinks.forEach(link => {
+      const a = document.createElement('a');
+      a.href = link.url;
+      a.className = 'quick-link';
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        // Load URL in current tab
+        window.parent.postMessage({
+          type: 'loadURL',
+          url: processUrl(link.url)
+        }, '*');
+      });
+      a.innerHTML = `
+        <span class="material-icons quick-link-icon">${link.icon}</span>
+        <span class="quick-link-label">${link.label}</span>
+      `;
+      container.appendChild(a);
+    });
+
+// Add URL processing function
+function processUrl(input) {
+  const currentSettings = window.parent.store.get('settings') || { searchEngine: 'google' };
+  const searchEngineUrls = {
+    google: 'https://www.google.com/search?q=',
+    bing: 'https://www.bing.com/search?q=',
+    duckduckgo: 'https://duckduckgo.com/?q='
+  };
+
+  if (!input.startsWith('http://') && !input.startsWith('https://') && !input.startsWith('file://')) {
+    if (input.includes('.') && !input.includes(' ')) {
+      return `https://${input}`;
+    }
+    return `${searchEngineUrls[currentSettings.searchEngine]}${encodeURIComponent(input)}`;
+  }
+  return input;
+}
+
+    document.getElementById('customize-button').addEventListener('click', () => {
+      const menu = document.getElementById('customize-menu');
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('change-wallpaper').addEventListener('click', () => {
+      document.getElementById('wallpaper-input').click();
+    });
+
+    document.getElementById('reset-wallpaper').addEventListener('click', () => {
+      loadBackgroundImage();
+    });
+
+    document.getElementById('theme-select').addEventListener('change', (e) => {
+      document.body.setAttribute('data-theme', e.target.value);
+    });
+
+    document.getElementById('search-engine-select').addEventListener('change', (e) => {
+      const searchEngines = {
+        google: 'https://www.google.com/search?q=',
+        bing: 'https://www.bing.com/search?q=',
+        duckduckgo: 'https://duckduckgo.com/?q='
+      };
+      window.searchEngine = searchEngines[e.target.value];
+    });
+    
+    // Initialize search engine
+    window.searchEngine = 'https://search.brave.com/search?q=';
+
+    document.getElementById('wallpaper-input').addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          document.documentElement.style.setProperty('--background-image', `url('${reader.result}')`);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
+</body>
+</html>
+<style>
+    .search-container {
+      background: #1a1a1a;
+      border: 1px solid #2d2d2d;
+    }
+
+    .search-container:hover {
+      background: #262626;
+      border-color: #3a3a3a;
+    }
+
+    .stats-container {
+      background: #1a1a1a;
+      border: 1px solid #2d2d2d;
+    }
+
+    .stats-container:hover {
+      background: #262626;
+      border-color: #3a3a3a;
+    }
+
+    .quick-links {
+      background: #1a1a1a;
+      border: 1px solid #2d2d2d;
+    }
+
+    .quick-links:hover {
+      background: #262626;
+      border-color: #3a3a3a;
+    }
+
+    .quick-link {
+      background: #262626;
+      border: 1px solid #3a3a3a;
+    }
+
+    .quick-link:hover {
+      background: #333333;
+      border-color: #404040;
+    }
+
+    .customize-button {
+      background: #1a1a1a;
+      border: 1px solid #2d2d2d;
+      color: #e0e0e0;
+    }
+
+    .customize-button:hover {
+      background: #262626;
+      border-color: #3a3a3a;
+    }
+
+    .customize-menu {
+      background: #1a1a1a;
+      border: 1px solid #2d2d2d;
+    }
+
+</style>

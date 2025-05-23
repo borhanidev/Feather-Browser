@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Modern Browser</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- Include Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  <div class="browser">
+    <div class="top-container">
+      <div class="tabs-bar">
+        <div class="tabs" id="tabs">
+          <!-- Tabs will be dynamically added here -->
+        </div>
+        <button class="new-tab" id="new-tab">
+          <span class="material-icons">add</span>
+        </button>
+        <div class="window-controls">
+          <button class="minimize">
+            <span class="material-icons">remove</span>
+          </button>
+          <button class="maximize">
+            <span class="material-icons">crop_square</span>
+          </button>
+          <button class="close">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="navigation-buttons">
+          <button id="back" disabled>
+            <span class="material-icons">arrow_back</span>
+          </button>
+          <button id="forward" disabled>
+            <span class="material-icons">arrow_forward</span>
+          </button>
+          <button id="reload">
+            <span class="material-icons">refresh</span>
+          </button>
+        </div>
+        
+        <div class="address-bar">
+          <input type="text" id="url-input" placeholder="Search or enter address">
+        </div>
+        
+        <div class="browser-actions">
+          <button id="bookmark">
+            <span class="material-icons">star</span>
+          </button>
+          <button id="menu">
+            <span class="material-icons">more_vert</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="webview-container" id="webview-container">
+      <!-- WebViews will be dynamically added here -->
+    </div>
+
+    <div class="loading-spinner" id="loading-spinner" style="display:none;">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="menu-popup" id="menu-popup">
+      <div class="menu-item" id="show-bookmarks">Bookmarks</div>
+      <div class="menu-item" id="show-history">History</div>
+      <div class="menu-item" id="show-downloads">Downloads</div>
+      <div class="menu-item" id="show-settings">Settings</div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
