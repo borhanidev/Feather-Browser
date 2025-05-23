@@ -1,8 +1,8 @@
-# 🌐 ElectronBrowser – A Simple, Hackable Browser
+# 🌐 Feather Browser – A Simple, Hackable Browser
 
 [![License: MPL-2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://www.mozilla.org/MPL/2.0/)
 
-**ElectronBrowser** is a basic web browser built using [Electron](https://www.electronjs.org/).  
+**Feather Browser** is a basic web browser built using [Electron](https://www.electronjs.org/).  
 It’s intentionally minimal — the goal is for **you** (the community) to edit, improve, and shape it however you like.
 
 This is a community-driven project. Fork it, break it, rebuild it, and make something amazing.
